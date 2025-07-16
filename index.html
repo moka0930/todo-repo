@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家計簿アプリ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Variables for Light and Dark Mode */
+        :root {
+            /* Light Mode Colors */
+            --bg-color: #f7f9fc; /* 非常に明るい背景色 */
+            --text-color: #2c3e50; /* ダークネイビー */
+            --header-text-color: #34495e; /* やや濃いめのダークネイビー */
+            --input-border-color: #dfe6e9; /* 薄いグレー */
+            --input-bg-color: #ffffff; /* 白 */
+            --button-bg: #4a90e2; /* 鮮やかなブルー */
+            --button-hover-bg: #3a7bd2; /* やや濃いブルー */
+            --progress-container-bg: #e9ecef; /* 明るいグレー */
+            --progress-bar-bg: #6ab04c; /* フレッシュグリーン */
+            --progress-label-color: #555;
+            --expense-list-bg: #ffffff; /* 白 */
+            --expense-item-bg: #fdfefe; /* 非常に明るいオフホワイト */
+            --expense-item-text: #34495e;
+            --expense-item-date: #7f8c8d; /* ダークグレー */
+            --delete-btn-bg: #e74c3c; /* 赤 */
+            --delete-btn-hover-bg: #c0392b; /* 濃い赤 */
+            --hr-color: #eceff1; /* 非常に薄いグレー */
+            --total-expenses-color: #2c3e50;
+            --chart-bg: #ffffff;
+            --chart-border-color: #ccc;
+            --chart-label-color: #555;
+            --tap-value-bg: rgba(0, 0, 0, 0.7);
+            --tap-value-text: white;
+            --reset-button-bg: #f44336;
+            --menu-icon-color: #555;
+            --budget-bar-color: #5cb85c; /* 緑系の予算バー */
+            --expense-bar-color: #f0ad4e; /* オレンジ系の支出バー */
+        }
+
+        /* Dark Mode Colors */
+        body.dark-mode {
+            --bg-color: #20232a; /* 非常に濃いダークグレー */
+            --text-color: #e0e0e0; /* 明るいグレー (読める色) */
+            --header-text-color: #f5f5f5; /* 白に近いグレー */
+            --input-border-color: #4a4a4a; /* 暗めのグレー */
+            --input-bg-color: #31333b; /* 濃いグレー */
+            --button-bg: #b78b5b; /* ブラウン系のボタン色 */
+            --button-hover-bg: #936c45; /* やや濃いブラウン */
+            --progress-container-bg: #42464d; /* 暗いグレー */
+            --progress-bar-bg: #4CAF50; /* 緑 */
+            --progress-label-color: #ccc;
+            --expense-list-bg: #2b2e35; /* チャコールグレー */
+            --expense-item-bg: #3c4046; /* やや明るいチャコールグレー */
+            --expense-item-text: #e0e0e0; /* 明るいグレー */
+            --expense-item-date: #a0a0a0; /* 薄いグレー */
+            --delete-btn-bg: #d64535; /* 暗い赤 */
+            --delete-btn-hover-bg: #b53b2d; /* さらに濃い赤 */
+            --hr-color: #555;
+            --total-expenses-color: #f5f5f5;
+            --chart-bg: #31333b; /* input-bg-colorと同じく濃いグレー */
+            --chart-border-color: #666;
+            --chart-label-color: #ccc;
+            --tap-value-bg: rgba(255, 255, 255, 0.9); /* 明るい背景 */
+            --tap-value-text: #333; /* 暗いテキスト */
+            --reset-button-bg: #d64535;
+            --menu-icon-color: #e0e0e0; /* 明るいグレー */
+            --budget-bar-color: #4CAF50; /* 暗い緑 */
+            --expense-bar-color: #FFC107; /* 暗いオレンジ */
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Noto Serif JP', serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-y: auto;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            box-sizing: border-box;
+            background-image: url('image_a8e165.jpg'); 
+            background-size: cover; 
+            background-position: center center; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            
+            transition: background-color 0.3s ease, color 0.3s ease; 
+            display: flex;
+            justify-content: center;
+        }
+        
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .screen {
+            /* transition: opacity 0.5s ease-in-out; */ /* 削除 */
+        }
+        .hidden {
+            display: none !important; 
+            opacity: 0 !important; 
+            height: 0 !important; 
+            overflow: hidden !important; 
+            pointer-events: none; 
+            position: absolute; 
+        }
+
+        h1, h2, h3 {
+            color: var(--header-text-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        input[type="number"],
+        input[type="text"],
+        input[type="date"] { 
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background-color: var(--input-bg-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        button {
+            background-color: var(--button-bg);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+        .dark-mode-toggle-wrapper h2 {
+            margin: 0;
+            font-size: 1.6em;
+            color: var(--header-text-color);
+        }
+        #darkModeToggle {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: var(--menu-icon-color);
+            width: auto;
+            padding: 0;
+            line-height: 1;
+            box-shadow: none;
+            transition: transform 0.2s ease;
+        }
+        #darkModeToggle:hover {
+            transform: scale(1.05);
+            background: none;
+            box-shadow: none;
+        }
+        #darkModeToggle:active {
+            transform: scale(0.98);
+            background: none;
+            box-shadow: none;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--progress-container-bg);
+            border-radius: 10px;
+            margin: 25px 0;
+            height: 25px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-bar-bg);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.6s ease-in-out, background-color 0.6s ease-in-out; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-end; 
+        }
+        .progress-bar-label {
+            margin-right: 10px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: clip; 
+            color: var(--progress-label-color);
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 2;
+            text-shadow: 0 0 3px rgba(255,255,255,0.7);
+        }
+        body.dark-mode .progress-bar-label {
+            text-shadow: 0 0 3px rgba(0,0,0,0.7);
+            color: var(--progress-label-color);
+        }
+
+        /* Daily Expense Screen */
+        .header-daily-expense {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .header-daily-expense .left-section {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .header-daily-expense h2 {
+            margin: 0;
+            font-size: 1.8em;
+            text-align: left;
+            flex-grow: 1;
+            font-weight: 700;
+        }
+        .header-daily-expense p {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        #menuIcon {
+            font-size: 1.8em;
+            cursor: pointer;
+            color: var(--menu-icon-color);
+            margin-right: 15px;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+        #menuIcon:hover {
+            transform: translateX(-3px);
+        }
+        .date-info {
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid var(--hr-color);
+            margin: 30px 0;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .start-button-wrapper {
+            margin-top: 30px;
+        }
+
+        /* Savings Statistics Screen */
+        .savings-display {
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--header-text-color);
+            text-align: center;
+            margin: 30px 0 40px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+        .savings-chart-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--header-text-color);
+            margin-bottom: 15px;
+        }
+        .savings-chart-container {
+            position: relative;
+            height: 250px;
+            padding: 10px 0 30px 0px;
+            background-color: var(--chart-bg);
+            border-radius: 10px;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.06);
+            overflow: hidden;
+            border: 1px solid var(--hr-color);
+        }
+        .savings-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            border-bottom: 1px solid var(--chart-border-color);
+            position: relative;
+            padding: 0 5px;
+        }
+        .chart-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+            cursor: pointer;
+            padding-bottom: 35px;
+        }
+
+        .chart-bars-container {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            justify-content: center;
+        }
+
+        .chart-bar {
+            width: 45%;
+            flex-shrink: 0;
+            margin: 0 3%;
+            transition: height 0.5s ease-in-out, background-color 0.5s ease-in-out; 
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.08);
+        }
+        .chart-bar:hover {
+            filter: brightness(1.08);
+            transform: scaleY(1.01);
+        }
+
+        .budget-bar {
+            background-color: var(--budget-bar-color);
+        }
+
+        .expense-bar {
+            background-color: var(--expense-bar-color);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: 0px;
+            font-size: 0.85em;
+            color: var(--chart-label-color);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .y-axis-label {
+            display: none;
+        }
+
+        /* Value display on tap */
+        .tap-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--tap-value-bg);
+            color: var(--tap-value-text);
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, top 0.3s ease-in-out; 
+            pointer-events: none;
+            z-index: 100; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .tap-value.show {
+            opacity: 1;
+            top: -35px;
+        }
+
+
+        /* Planned Item List Styles */
+        .planned-items-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--hr-color);
+        }
+        .planned-items-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap; 
+        }
+        .planned-items-input-group input[type="text"],
+        .planned-items-input-group input[type="number"] {
+            color: #000000; 
+            flex-grow: 1;
+            margin-bottom: 0;
+            min-width: 120px;
+        }
+
+        .planned-items-input-group input[type="text"]::placeholder,
+        .planned-items-input-group input[type="number"]::placeholder {
+            color: var(--expense-item-date); 
+            opacity: 1;
+        }
+
+        /* 日付入力欄のデフォルトの文字色（入力前＝プレースホルダーの色）を設定 */
+        .planned-items-input-group input[type="date"] {
+            color: var(--expense-item-date); 
+            flex-grow: 1;
+            margin-bottom: 0;
+            min-width: 120px;
+        }
+
+        /* 日付入力欄に値がある（入力された）場合の文字色 */
+        .planned-items-input-group input[type="date"].value-entered {
+            color: #000000; 
+        }
+
+        /* ダークモード時のスタイル */
+        body.dark-mode input[type="number"], /* 今月の予算設定の入力欄も含む */
+        body.dark-mode input[type="text"] {
+            color: #ffffff; 
+        }
+
+        body.dark-mode input[type="number"]::placeholder, /* 今月の予算設定の入力欄も含む */
+        body.dark-mode input[type="text"]::placeholder {
+            color: var(--expense-item-date); 
+            opacity: 1;
+        }
+
+        /* ダークモード時の日付入力欄のデフォルトの文字色（入力前＝プレースホルダーの色）を設定 */
+        body.dark-mode .planned-items-input-group input[type="date"] {
+            color: var(--expense-item-date); 
+        }
+
+        /* ダークモード時の日付入力欄に値がある（入力された）場合の文字色 */
+        body.dark-mode .planned-items-input-group input[type="date"].value-entered {
+            color: #ffffff; 
+        }
+
+        /* ダークモード時のカレンダーアイコンの色調整 */
+        body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .planned-items-input-group button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 15px;
+            box-shadow: none;
+            flex-shrink: 0;
+        }
+        .planned-items-input-group button:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .planned-list {
+            background-color: var(--expense-list-bg);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--hr-color);
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+            margin-top: 15px;
+        }
+        .planned-item {
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: space-between;
+            align-items: center; 
+            padding: 10px 12px;
+            padding-bottom: 40px; 
+            margin-bottom: 6px;
+            background-color: #fff8f2;
+            border: 1px solid #e7dcd1;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            font-size: 1em;
+            color: var(--expense-item-text);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease; 
+            position: relative; 
+        }
+        body.dark-mode .planned-item {
+            background-color: var(--expense-item-bg);
+            border-color: var(--hr-color);
+        }
+        .planned-item:last-child {
+            margin-bottom: 0;
+        }
+        .planned-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+        }
+        .planned-item-info {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            flex-basis: calc(100% - 50px); 
+        }
+        .planned-item-info input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: var(--button-bg);
+            transition: transform 0.2s ease; 
+        }
+        .planned-item-info input[type="checkbox"]:active {
+            transform: scale(0.9);
+        }
+
+        .planned-item-name {
+            flex-grow: 1;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 15px; 
+        }
+        .planned-item-amount {
+            font-weight: 700;
+            color: var(--button-bg);
+            margin-right: 50px; 
+            flex-shrink: 0;
+            white-space: nowrap;
+            padding-left: 10px; 
+        }
+        /* Planned item completed style */
+        .planned-item.completed {
+            background-color: var(--progress-container-bg); 
+        }
+        .planned-item.completed .planned-item-name,
+        .planned-item.completed .planned-item-amount,
+        .planned-item.completed .planned-item-planned-date { 
+            text-decoration: line-through;
+            color: var(--expense-item-date);
+        }
+        /* 完了日時の表示スタイル */
+        .planned-item-completed-date {
+            font-size: 0.8em;
+            color: var(--expense-item-date);
+            position: absolute; 
+            bottom: 8px; 
+            left: 45px; 
+            white-space: nowrap;
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
+        }
+        .planned-item.completed .planned-item-completed-date {
+            opacity: 1; 
+        }
+
+        /* 購入予定日の表示スタイル */
+        .planned-item-planned-date {
+            font-size: 0.85em;
+            color: var(--expense-item-date);
+            position: absolute;
+            bottom: 25px; 
+            left: 45px;
+            white-space: nowrap;
+        }
+
+
+        .delete-planned-btn {
+            background-color: var(--delete-btn-bg);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 0.9em;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            margin-left: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.2s ease, transform 0.2s ease; 
+            position: absolute; 
+            top: 10px;
+            right: 10px;
+        }
+        .delete-planned-btn:hover {
+            background-color: var(--delete-btn-hover-bg);
+            transform: scale(1.03);
+        }
+
+        /* Added: Total amounts display */
+        .planned-summary {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: var(--expense-list-bg);
+            border-radius: 10px;
+            border: 1px solid var(--hr-color);
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+            font-size: 1.1em;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .planned-summary div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .planned-summary div:last-child {
+            margin-bottom: 0;
+        }
+        .total-completed-amount {
+            color: var(--progress-bar-bg);
+        }
+        .total-uncompleted-amount {
+            color: var(--delete-btn-bg);
+        }
+
+
+        /* Responsive Styles */
+        @media (max-width: 520px) {
+            .main-container {
+                max-width: 100%;
+            }
+            body {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+            /* ヘッダー要素の調整 */
+            .header-daily-expense {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .header-daily-expense .left-section {
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            .header-daily-expense h2 {
+                margin: 0;
+                font-size: 1.6em;
+                text-align: left;
+                flex-grow: 1;
+            }
+            .header-daily-expense p {
+                margin: 0;
+                font-size: 1.1em;
+                width: 100%;
+                text-align: left;
+                white-space: nowrap;
+            }
+            #menuIcon {
+                margin-right: 10px;
+                font-size: 2.0em; 
+                flex-shrink: 0;
+            }
+
+            .dark-mode-toggle-wrapper {
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            .dark-mode-toggle-wrapper h2 {
+                font-size: 1.5em;
+            }
+            #darkModeToggle {
+                margin-left: 8px;
+                font-size: 2em;
+            }
+            
+            .savings-chart-container {
+                height: 200px;
+                padding-bottom: 25px;
+            }
+            /* グラフのバーの表示調整 */
+            .chart-bar-wrapper {
+                flex-grow: 1; 
+                margin: 0; 
+                padding-bottom: 25px; 
+            }
+            .chart-bar-wrapper + .chart-bar-wrapper {
+                margin-left: 0;
+            }
+            .chart-bar {
+                width: 45%;
+                margin: 0 2.5%;
+            }
+            .chart-bar-label {
+                font-size: 0.8em;
+                bottom: 0px; 
+                transform: translateX(-50%); 
+                left: 50%; 
+            }
+            .chart-bars-container {
+                bottom: 20px;
+            }
+
+            /* Planned Items Responsive */
+            .planned-items-input-group {
+                flex-direction: column; 
+                gap: 10px;
+            }
+            .planned-items-input-group input,
+            .planned-items-input-group button {
+                width: 100%;
+            }
+            .planned-item {
+                padding: 8px 10px;
+                padding-bottom: 35px; 
+                align-items: flex-start;
+            }
+            .planned-item-info {
+                flex-basis: 100%; 
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+            }
+            .planned-item-name {
+                flex-grow: 1;
+                font-size: 0.95em;
+                white-space: normal;
+                word-break: break-word;
+                margin-right: 10px; 
+            }
+            .planned-item-amount {
+                font-weight: 700; 
+                color: var(--button-bg); 
+                margin-left: auto; 
+                margin-right: 0; 
+                flex-shrink: 0;
+                font-size: 0.95em;
+                text-align: right;
+                padding-left: 5px; 
+            }
+            .planned-item-info input[type="checkbox"] {
+                margin-right: 10px;
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+            /* 削除ボタンの配置を修正 */
+            .delete-planned-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 28px;
+                height: 28px;
+                font-size: 0.9em;
+                margin: 0;
+                padding: 0;
+                z-index: 10; 
+            }
+            /* 完了日時の表示スタイル (レスポンシブ) */
+            .planned-item-completed-date {
+                font-size: 0.75em;
+                bottom: 6px;
+                left: 40px; 
+            }
+            /* 購入予定日の表示スタイル (レスポンシブ) */
+            .planned-item-planned-date {
+                font-size: 0.8em;
+                bottom: 22px;
+                left: 40px;
+            }
+        }
+
+        /* Specific adjustment for smaller phones (e.g., iPhone SE) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px;
+            }
+            input[type="number"], input[type="text"], input[type="date"] {
+                padding: 10px;
+                font-size: 14px;
+            }
+            button {
+                padding: 10px 15px;
+                font-size: 15px;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            .header-daily-expense p {
+                font-size: 0.9em;
+            }
+            #menuIcon {
+                font-size: 1.8em; 
+            }
+            .date-info {
+                font-size: 0.9em;
+            }
+            .progress-bar-label {
+                font-size: 0.85em;
+                right: 8px;
+            }
+             /* Planned Items Responsive for small phones */
+            .planned-item-info input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                margin-right: 8px;
+            }
+            .planned-item-name, .planned-item-amount {
+                font-size: 0.9em;
+            }
+            .planned-item-amount {
+                margin-right: 40px; 
+            }
+            .delete-planned-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 0.8em;
+                top: 6px;
+                right: 6px;
+            }
+            .planned-item {
+                padding-bottom: 30px; 
+            }
+            .planned-item-completed-date {
+                font-size: 0.7em;
+                bottom: 4px;
+                left: 35px; 
+            }
+            .planned-item-planned-date { 
+                font-size: 0.75em;
+                bottom: 20px;
+                left: 35px;
+            }
+            .planned-summary {
+                font-size: 1em;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div id="budgetSettingScreen" class="screen">
+            <div class="dark-mode-toggle-wrapper">
+                <h2>今月の予算を設定</h2>
+                <button id="darkModeToggle" aria-label="Toggle Dark Mode">☀️</button>
+            </div>
+            <input type="number" id="monthlyBudgetInput" placeholder="今月の予算を入力 (例: 50000)" min="0">
+            <p class="text-center" id="dailyAverageSpend">1週間平均〇〇円使えます</p>
+            <p class="text-center">今月も頑張りましょう！</p>
+            <div class="start-button-wrapper">
+                <button id="startBudgetButton">スタート</button>
+            </div>
+        </div>
+
+        <div id="dailyExpenseScreen" class="screen hidden">
+            <div class="header-daily-expense">
+                <div class="left-section">
+                    <div id="menuIcon">&#x25C0;</div>
+                    <h2 id="currentMonthBudget">今月の予算：<span id="displayMonthlyBudget"></span>円</h2>
+                </div>
+                <p>あまり：<span id="remainingBudget"></span>円</p>
+            </div>
+
+            <p class="date-info" id="currentDateInfo"></p>
+            <div class="progress-bar-container" id="dailyProgressBarContainer">
+                <div class="progress-bar" id="dailyExpenseProgressBar">
+                    <span class="progress-bar-label">MAX</span>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="planned-items-section">
+                <h3>今月の計画</h3>
+                <div class="planned-items-input-group">
+                    <input type="text" id="plannedItemNameInput" placeholder="アイテム名 (例: 化粧水)">
+                    <input type="number" id="plannedItemAmountInput" placeholder="予定金額 (例: 2000)" min="0">
+                    <input type="date" id="plannedItemDateInput" required class="value-display-color"> <button id="addPlannedItemButton">追加</button>
+                </div>
+                <div class="planned-list" id="monthlyPlannedList">
+                    <p style="text-align: center; color: #888;">今月の計画はありません</p>
+                </div>
+                <div class="planned-summary">
+                    <div>
+                        <span>完了済み合計:</span>
+                        <span id="totalCompletedPlannedAmount" class="total-completed-amount">0円</span>
+                    </div>
+                    <div>
+                        <span>未完了合計:</span>
+                        <span id="totalUncompletedPlannedAmount" class="total-uncompleted-amount">0円</span>
+                    </div>
+                </div>
+            </div>
+            <button id="viewStatisticsButton" style="margin-top: 25px;">統計を見る</button>
+        </div>
+
+        <div id="savingsStatisticsScreen" class="screen hidden">
+            <h2>累計貯蓄額</h2>
+            <div class="savings-display" id="accumulatedSavings">0円</div>
+
+            <h3 class="savings-chart-title">月別収支グラフ</h3>
+            <div class="savings-chart-container">
+                <div class="savings-chart" id="savingsChart">
+                </div>
+            </div>
+
+            <button id="backToDailyExpenseButton" style="margin-top: 30px;">戻る</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const budgetSettingScreen = document.getElementById('budgetSettingScreen');
+            const monthlyBudgetInput = document.getElementById('monthlyBudgetInput');
+            const dailyAverageSpend = document.getElementById('dailyAverageSpend');
+            const startBudgetButton = document.getElementById('startBudgetButton');
+
+            const dailyExpenseScreen = document.getElementById('dailyExpenseScreen');
+            const displayMonthlyBudget = document.getElementById('displayMonthlyBudget');
+            const remainingBudget = document.getElementById('remainingBudget');
+            const dailyProgressBarContainer = document.getElementById('dailyProgressBarContainer'); 
+            const dailyExpenseProgressBar = document.getElementById('dailyExpenseProgressBar');
+            const currentDateInfo = document.getElementById('currentDateInfo');
+            const menuIcon = document.getElementById('menuIcon');
+            const viewStatisticsButton = document.getElementById('viewStatisticsButton');
+
+            const savingsStatisticsScreen = document.getElementById('savingsStatisticsScreen');
+            const accumulatedSavings = document.getElementById('accumulatedSavings');
+            const savingsChart = document.getElementById('savingsChart');
+            const backToDailyExpenseButton = document.getElementById('backToDailyExpenseButton');
+
+            const darkModeToggle = document.getElementById('darkModeToggle');
+
+            // Planned Items DOM elements
+            const plannedItemNameInput = document.getElementById('plannedItemNameInput');
+            const plannedItemAmountInput = document.getElementById('plannedItemAmountInput');
+            const plannedItemDateInput = document.getElementById('plannedItemDateInput');
+            const addPlannedItemButton = document.getElementById('addPlannedItemButton');
+            const monthlyPlannedList = document.getElementById('monthlyPlannedList');
+            const totalCompletedPlannedAmount = document.getElementById('totalCompletedPlannedAmount');
+            const totalUncompletedPlannedAmount = document.getElementById('totalUncompletedPlannedAmount');
+
+
+            // --- Data Storage (using localStorage) ---
+            let currentMonthlyBudget = 0; 
+            // monthlyBudgetsHistory: { 'YYYY': { 'YYYY-MM': budgetAmount } }
+            let monthlyBudgetsHistory = {};
+            // monthlyPlannedItems: { 'YYYY-MM': [{ id, item, amount, isChecked: boolean, completedDate?: string, plannedDate?: string }, ...] } 
+            let monthlyPlannedItems = {}; 
+            let totalSavings = 0; // Total accumulated savings/deficit across all months
+
+            // --- Helper Functions ---
+
+            /**
+             * 画面を切り替える関数 (即時切り替え)
+             * @param {HTMLElement} showScreen - 表示する画面の要素
+             * @param {HTMLElement} hideScreen - 非表示にする画面の要素
+             */
+            function switchScreen(showScreen, hideScreen) {
+                hideScreen.classList.add('hidden');
+                showScreen.classList.remove('hidden');
+            }
+
+            /**
+             * Generates a unique ID for planned items.
+             */
+            function generateUniqueId() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            /**
+             * Gets the current year key (YYYY).
+             */
+            function getCurrentYearKey() {
+                return new Date().getFullYear().toString();
+            }
+
+            /**
+             * Gets the current month key (YYYY-MM).
+             */
+            function getCurrentMonthKey() {
+                const now = new Date();
+                return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            }
+
+            /**
+             * Formats a date object intoYYYY-MM-DD.
+             * @param {Date} date - The date object to format.
+             */
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            /**
+             * Gets the number of days in a specific month.
+             */
+            function getDaysInMonth(year, month) {
+                return new Date(year, month + 1, 0).getDate();
+            }
+
+            /**
+             * Calculates total checked planned expenses for a given month key (YYYY-MM).
+             */
+            function calculateTotalCheckedPlannedExpensesForMonth(yearMonthKey) {
+                let total = 0;
+                if (monthlyPlannedItems[yearMonthKey]) {
+                    monthlyPlannedItems[yearMonthKey].forEach(item => {
+                        if (item.isChecked) {
+                            total += item.amount;
+                        }
+                    });
+                }
+                return total;
+            }
+
+            /**
+             * Calculates total UNCHECKED planned expenses for a given month key (YYYY-MM).
+             */
+            function calculateTotalUncheckedPlannedExpensesForMonth(yearMonthKey) {
+                let total = 0;
+                if (monthlyPlannedItems[yearMonthKey]) {
+                    monthlyPlannedItems[yearMonthKey].forEach(item => {
+                        if (!item.isChecked) {
+                            total += item.amount;
+                        }
+                    });
+                }
+                return total;
+            }
+
+            /**
+             * Loads data from localStorage.
+             */
+            function loadData() {
+                currentMonthlyBudget = parseInt(localStorage.getItem('currentMonthlyBudget')) || 0;
+                monthlyPlannedItems = JSON.parse(localStorage.getItem('monthlyPlannedItems')) || {};
+                monthlyBudgetsHistory = JSON.parse(localStorage.getItem('monthlyBudgetsHistory')) || {};
+                totalSavings = parseInt(localStorage.getItem('totalSavings')) || 0;
+
+                // Initialize current month's entry if it doesn't exist
+                const currentMonth = getCurrentMonthKey();
+                if (!monthlyPlannedItems[currentMonth]) {
+                    monthlyPlannedItems[currentMonth] = [];
+                }
+                const currentYear = getCurrentYearKey();
+                if (!monthlyBudgetsHistory[currentYear]) {
+                    monthlyBudgetsHistory[currentYear] = {};
+                }
+            }
+
+            /**
+             * Saves data to localStorage.
+             */
+            function saveData() {
+                localStorage.setItem('currentMonthlyBudget', currentMonthlyBudget);
+                localStorage.setItem('monthlyPlannedItems', JSON.stringify(monthlyPlannedItems));
+                localStorage.setItem('monthlyBudgetsHistory', JSON.stringify(monthlyBudgetsHistory));
+                localStorage.setItem('totalSavings', totalSavings);
+            }
+
+            /**
+             * Updates the UI for the budget setup screen.
+             */
+            function updateBudgetSetupUI() {
+                const budgetValue = parseInt(monthlyBudgetInput.value) || 0;
+                if (budgetValue > 0) {
+                    const now = new Date();
+                    const daysInCurrentMonth = getDaysInMonth(now.getFullYear(), now.getMonth());
+                    const weeksInCurrentMonth = daysInCurrentMonth / 7;
+                    const avgWeekly = budgetValue / weeksInCurrentMonth;
+                    dailyAverageSpend.textContent = `1週間平均${Math.round(avgWeekly)}円使えます`;
+                } else {
+                    dailyAverageSpend.textContent = '1週間平均〇〇円使えます';
+                }
+            }
+
+            /**
+             * Updates the UI for the daily expense screen.
+             */
+            function updateDailyExpenseUI() {
+                displayMonthlyBudget.textContent = currentMonthlyBudget;
+
+                const now = new Date();
+                const currentDay = now.getDate();
+                const daysInCurrentMonth = getDaysInMonth(now.getFullYear(), now.getMonth());
+                const remainingDays = daysInCurrentMonth - currentDay;
+
+                currentDateInfo.textContent = `今日は ${now.getMonth() + 1}月${currentDay}日 です。今月はあと${remainingDays}日！`;
+
+                const currentMonth = getCurrentMonthKey();
+                let totalCheckedExpenses = calculateTotalCheckedPlannedExpensesForMonth(currentMonth);
+                let totalUncheckedExpenses = calculateTotalUncheckedPlannedExpensesForMonth(currentMonth);
+                
+                const currentRemaining = currentMonthlyBudget - totalCheckedExpenses;
+                remainingBudget.textContent = currentRemaining;
+
+                // プログレスバーの表示制御
+                if (currentMonthlyBudget > 0) {
+                    dailyProgressBarContainer.classList.remove('hidden');
+                    let percentageUsed = (totalCheckedExpenses / currentMonthlyBudget) * 100;
+                    dailyExpenseProgressBar.style.width = `${Math.min(percentageUsed, 100)}%`; 
+                    dailyExpenseProgressBar.style.backgroundColor = percentageUsed > 100 ? '#e74c3c' : 'var(--progress-bar-bg)'; 
+                    
+                    const progressBarLabel = dailyProgressBarContainer.querySelector('.progress-bar-label');
+                    if (percentageUsed > 100) {
+                        progressBarLabel.textContent = `OVER!`;
+                    } else if (percentageUsed > 90) {
+                        progressBarLabel.textContent = `あと少し!`;
+                    } else if (percentageUsed === 0) {
+                        progressBarLabel.textContent = `0%`;
+                    } else {
+                        progressBarLabel.textContent = `${Math.round(percentageUsed)}%`;
+                    }
+
+                } else {
+                    dailyProgressBarContainer.classList.add('hidden'); 
+                }
+                
+                // Update planned items list and totals
+                updatePlannedItemsList();
+                totalCompletedPlannedAmount.textContent = `${totalCheckedExpenses}円`;
+                totalUncompletedPlannedAmount.textContent = `${totalUncheckedExpenses}円`;
+            }
+
+            /**
+             * Updates the UI for the savings statistics screen.
+             */
+            function updateSavingsChart() {
+                accumulatedSavings.textContent = `${totalSavings}円`;
+
+                savingsChart.innerHTML = '';
+
+                const now = new Date();
+                const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+                const monthData = [];
+
+                // グラフを4月始まりにするためのロジック
+                let currentMonth = now.getMonth(); 
+                let currentYear = now.getFullYear();
+
+                let startMonth = 3; // 4月 (JavaScriptの月は0始まりなので3)
+                let startYear = currentYear;
+
+                if (currentMonth < startMonth) {
+                    startYear--;
+                }
+                
+                for (let i = 0; i < 12; i++) {
+                    const d = new Date(startYear, startMonth + i, 1);
+                    const targetYear = d.getFullYear();
+                    const targetMonthIndex = d.getMonth(); 
+                    const monthKey = `${targetYear}-${(targetMonthIndex + 1).toString().padStart(2, '0')}`;
+                    const monthName = monthNames[targetMonthIndex];
+                    const yearKey = targetYear.toString();
+
+                    let monthlyBudgetForChart = 0;
+                    if (monthlyBudgetsHistory[yearKey] && monthlyBudgetsHistory[yearKey][monthKey]) {
+                        monthlyBudgetForChart = monthlyBudgetsHistory[yearKey][monthKey];
+                    }
+
+                    let monthlyTotalCheckedPlannedExpensesForChart = calculateTotalCheckedPlannedExpensesForMonth(monthKey);
+
+                    monthData.push({ monthKey, monthName, monthlyBudgetForChart, monthlyTotalCheckedPlannedExpensesForChart });
+                }
+
+                const maxDisplayValue = Math.max(...monthData.map(d => Math.max(d.monthlyBudgetForChart, d.monthlyTotalCheckedPlannedExpensesForChart)), 50000);
+                const chartHeightPx = 250 - 30; 
+
+                monthData.forEach(data => {
+                    const { monthName, monthlyBudgetForChart, monthlyTotalCheckedPlannedExpensesForChart } = data;
+
+                    const barWrapperDiv = document.createElement('div');
+                    barWrapperDiv.classList.add('chart-bar-wrapper');
+
+                    const barsContainer = document.createElement('div');
+                    barsContainer.classList.add('chart-bars-container');
+
+                    // 予算の棒
+                    const budgetBarDiv = document.createElement('div');
+                    budgetBarDiv.classList.add('chart-bar', 'budget-bar');
+                    const budgetHeight = (monthlyBudgetForChart / maxDisplayValue) * chartHeightPx;
+                    budgetBarDiv.style.height = `${Math.min(budgetHeight, chartHeightPx)}px`; 
+                    budgetBarDiv.addEventListener('click', () => {
+                        toggleTapValue(budgetBarDiv, `${monthlyBudgetForChart}円 (予算)`);
+                    });
+
+                    // 支出（チェックされた計画アイテムの合計）の棒
+                    const expenseBarDiv = document.createElement('div');
+                    expenseBarDiv.classList.add('chart-bar', 'expense-bar');
+                    const expenseHeight = (monthlyTotalCheckedPlannedExpensesForChart / maxDisplayValue) * chartHeightPx;
+                    expenseBarDiv.style.height = `${Math.min(expenseHeight, chartHeightPx)}px`; 
+                    expenseBarDiv.addEventListener('click', () => {
+                        toggleTapValue(expenseBarDiv, `${monthlyTotalCheckedPlannedExpensesForChart}円 (支出)`);
+                    });
+
+                    barsContainer.appendChild(budgetBarDiv);
+                    barsContainer.appendChild(expenseBarDiv);
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.classList.add('chart-bar-label');
+                    labelSpan.textContent = monthName;
+
+                    barWrapperDiv.appendChild(barsContainer);
+                    barWrapperDiv.appendChild(labelSpan);
+                    savingsChart.appendChild(barWrapperDiv);
+                });
+            }
+
+            /**
+             * Toggles the display of a value above the tapped bar.
+             */
+            function toggleTapValue(barElement, valueText) {
+                let valueDisplay = barElement.querySelector('.tap-value');
+                if (!valueDisplay) {
+                    valueDisplay = document.createElement('span');
+                    valueDisplay.classList.add('tap-value');
+                    barElement.appendChild(valueDisplay);
+                }
+
+                // すでに表示されている場合は非表示に、非表示の場合は表示に切り替える
+                if (valueDisplay.classList.contains('show')) {
+                    valueDisplay.classList.remove('show');
+                } else {
+                    // 他の表示中のタップ値を非表示にする
+                    document.querySelectorAll('.tap-value.show').forEach(el => {
+                        el.classList.remove('show');
+                    });
+                    valueDisplay.textContent = valueText;
+                    valueDisplay.classList.add('show');
+                }
+            }
+
+
+            /**
+             * Monthly settlement logic.
+             * Compares previous month's budget and checked planned items and updates total savings.
+             * Also carries over uncompleted planned items to the next month.
+             */
+            function settleMonthlyBudget() {
+                const lastSettledMonthKey = localStorage.getItem('lastSettledMonthKey');
+                const currentMonthKey = getCurrentMonthKey();
+                const currentYearKey = getCurrentYearKey();
+
+                // If it's a new month or no settlement has occurred yet
+                if (!lastSettledMonthKey || lastSettledMonthKey !== currentMonthKey) {
+                    if (lastSettledMonthKey) { // If there was a previous month to settle
+                        const prevYearKey = lastSettledMonthKey.substring(0, 4);
+                        const prevMonthKey = lastSettledMonthKey;
+
+                        // Get the budget that was set for the previous month
+                        const budgetForPrevMonth = (monthlyBudgetsHistory[prevYearKey] && monthlyBudgetsHistory[prevYearKey][prevMonthKey]) ? monthlyBudgetsHistory[prevYearKey][prevMonthKey] : 0;
+
+                        let prevMonthTotalCheckedPlannedExpenses = calculateTotalCheckedPlannedExpensesForMonth(prevMonthKey);
+
+                        const netForPrevMonth = budgetForPrevMonth - prevMonthTotalCheckedPlannedExpenses;
+                        totalSavings += netForPrevMonth;
+                        saveData();
+                        alert(`先月(${prevMonthKey.split('-')[1]}月)の精算が完了しました！\n予算: ${budgetForPrevMonth}円\n支出（完了計画）: ${prevMonthTotalCheckedPlannedExpenses}円\n貯蓄に${netForPrevMonth}円が反映されました。\n現在の累計貯蓄額: ${totalSavings}円`);
+
+                        // --- 未完了の計画アイテムを次月に持ち越す処理 ---
+                        const uncompletedItemsToCarryOver = (monthlyPlannedItems[prevMonthKey] || []).filter(item => !item.isChecked);
+
+                        if (uncompletedItemsToCarryOver.length > 0) {
+                            if (!monthlyPlannedItems[currentMonthKey]) {
+                                monthlyPlannedItems[currentMonthKey] = [];
+                            }
+
+                            let carriedOverCount = 0;
+                            uncompletedItemsToCarryOver.forEach(item => {
+                                const newItem = {
+                                    id: generateUniqueId(),
+                                    item: `${item.item} (持ち越し)`,
+                                    amount: item.amount,
+                                    isChecked: false,
+                                    plannedDate: item.plannedDate 
+                                };
+                                monthlyPlannedItems[currentMonthKey].push(newItem);
+                                carriedOverCount++;
+                            });
+                            saveData();
+                            alert(`${prevMonthKey.split('-')[1]}月からの未完了の計画アイテム ${carriedOverCount}件 が今月(${currentMonthKey.split('-')[1]}月)に持ち越されました。`);
+                        }
+                        // --- 持ち越し処理ここまで ---
+                    }
+
+                    if (!monthlyBudgetsHistory[currentYearKey]) {
+                        monthlyBudgetsHistory[currentYearKey] = {}; 
+                    }
+                    monthlyBudgetsHistory[currentYearKey][currentMonthKey] = currentMonthlyBudget; 
+                    localStorage.setItem('lastSettledMonthKey', currentMonthKey);
+                    saveData();
+                }
+            }
+            
+            /**
+             * Updates the monthly planned items list in the UI.
+             */
+            function updatePlannedItemsList() {
+                monthlyPlannedList.innerHTML = '';
+                const currentMonth = getCurrentMonthKey();
+                let plannedItemsForMonth = monthlyPlannedItems[currentMonth] || [];
+
+                // 未完了アイテムと完了アイテムに分ける
+                const uncompletedItems = plannedItemsForMonth.filter(item => !item.isChecked);
+                const completedItems = plannedItemsForMonth.filter(item => item.isChecked);
+
+                // 未完了アイテムをplannedDateでソート (日付が新しいものほど上に)
+                // plannedDateがない場合はリストの最後にくるようにする (未来の日付とみなす)
+                uncompletedItems.sort((a, b) => {
+                    const dateA = a.plannedDate ? new Date(a.plannedDate) : new Date('2999-12-31'); 
+                    const dateB = b.plannedDate ? new Date(b.plannedDate) : new Date('2999-12-31');
+                    return dateA - dateB;
+                });
+
+                // 完了アイテムは完了日でソートするか、そのまま維持するか（今回はそのまま）
+
+                const sortedItems = [...uncompletedItems, ...completedItems];
+
+
+                if (sortedItems.length > 0) {
+                    sortedItems.forEach(item => {
+                        const div = document.createElement('div');
+                        div.classList.add('planned-item');
+                        if (item.isChecked) {
+                            div.classList.add('completed');
+                        }
+
+                        // 予定日の表示を整形
+                        let displayPlannedDate = item.plannedDate ? new Date(item.plannedDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' }) : '未定';
+                        if (displayPlannedDate !== '未定') {
+                            displayPlannedDate = `予定日: ${displayPlannedDate}`;
+                        }
+
+                        div.innerHTML = `
+                            <div class="planned-item-info">
+                                <input type="checkbox" data-id="${item.id}" ${item.isChecked ? 'checked' : ''}>
+                                <span class="planned-item-name">${item.item}</span>
+                                <span class="planned-item-amount">${item.amount}円</span>
+                            </div>
+                            <button class="delete-planned-btn" data-id="${item.id}">×</button>
+                            ${item.plannedDate ? `<span class="planned-item-planned-date">${displayPlannedDate}</span>` : ''} ${item.isChecked && item.completedDate ? `<span class="planned-item-completed-date">${item.completedDate} 完了</span>` : ''}
+                        `;
+                        monthlyPlannedList.appendChild(div);
+                    });
+                } else {
+                    monthlyPlannedList.innerHTML = '<p style="text-align: center; color: #888;">今月の計画はありません</p>';
+                }
+            }
+
+            // --- 新しいJSロジックの追加 ---
+            /**
+             * 日付入力欄の値の有無に応じてクラスを切り替える
+             */
+            function updateDateInputColor() {
+                if (plannedItemDateInput.value) {
+                    plannedItemDateInput.classList.add('value-entered');
+                } else {
+                    plannedItemDateInput.classList.remove('value-entered');
+                }
+            }
+
+            // --- Event Listeners ---
+
+            monthlyBudgetInput.addEventListener('input', updateBudgetSetupUI);
+
+            startBudgetButton.addEventListener('click', () => {
+                const budgetValue = parseInt(monthlyBudgetInput.value);
+                if (budgetValue > 0) {
+                    currentMonthlyBudget = budgetValue;
+                    const currentYear = getCurrentYearKey();
+                    const currentMonth = getCurrentMonthKey();
+                    if (!monthlyBudgetsHistory[currentYear]) {
+                        monthlyBudgetsHistory[currentYear] = {};
+                    }
+                    monthlyBudgetsHistory[currentYear][currentMonth] = currentMonthlyBudget;
+                    saveData();
+
+                    // 画面切り替え (即時)
+                    switchScreen(dailyExpenseScreen, budgetSettingScreen);
+                    updateDailyExpenseUI();
+                } else {
+                    alert('有効な予算を入力してください。');
+                }
+            });
+
+            // 日付入力欄の変更を監視
+            plannedItemDateInput.addEventListener('change', updateDateInputColor);
+            plannedItemDateInput.addEventListener('input', updateDateInputColor);
+
+            addPlannedItemButton.addEventListener('click', () => {
+                const item = plannedItemNameInput.value.trim();
+                const amount = parseInt(plannedItemAmountInput.value);
+                const plannedDate = plannedItemDateInput.value; 
+
+                if (item === '') {
+                    alert('計画アイテム名を入力してください。');
+                    return;
+                }
+                if (isNaN(amount) || amount < 0) {
+                    alert('有効な予定金額を入力してください。');
+                    return;
+                }
+                if (plannedDate === '') { 
+                    alert('購入予定日を入力してください。');
+                    return;
+                }
+
+                const currentMonth = getCurrentMonthKey();
+                if (!monthlyPlannedItems[currentMonth]) {
+                    monthlyPlannedItems[currentMonth] = [];
+                }
+
+                const newPlannedItem = {
+                    id: generateUniqueId(),
+                    item,
+                    amount,
+                    isChecked: false,
+                    plannedDate: plannedDate 
+                };
+                monthlyPlannedItems[currentMonth].push(newPlannedItem);
+                saveData();
+                updatePlannedItemsList();
+                updateDailyExpenseUI();
+
+                plannedItemNameInput.value = '';
+                plannedItemAmountInput.value = '';
+                plannedItemDateInput.value = ''; 
+                updateDateInputColor(); 
+            });
+
+            monthlyPlannedList.addEventListener('click', (event) => {
+                if (event.target.type === 'checkbox') {
+                    const itemId = event.target.dataset.id;
+                    const currentMonth = getCurrentMonthKey();
+                    const itemIndex = monthlyPlannedItems[currentMonth].findIndex(item => item.id === itemId);
+
+                    if (itemIndex > -1) {
+                        monthlyPlannedItems[currentMonth][itemIndex].isChecked = event.target.checked;
+                        if (event.target.checked) {
+                            // チェックされたら完了日時を記録
+                            monthlyPlannedItems[currentMonth][itemIndex].completedDate = formatDate(new Date());
+                        } else {
+                            // チェックが外れたら完了日時を削除
+                            delete monthlyPlannedItems[currentMonth][itemIndex].completedDate;
+                        }
+                        saveData();
+                        updatePlannedItemsList();
+                        updateDailyExpenseUI();
+                    }
+                } else if (event.target.classList.contains('delete-planned-btn')) {
+                    const itemIdToDelete = event.target.dataset.id;
+                    const currentMonth = getCurrentMonthKey();
+                    if (monthlyPlannedItems[currentMonth]) {
+                        // アニメーションのために要素を削除する前にクラスを追加 (これは削除アニメーションのために残します)
+                        const itemElement = event.target.closest('.planned-item');
+                        if (itemElement) {
+                            itemElement.style.opacity = '0';
+                            itemElement.style.transform = 'translateX(100%)';
+                            itemElement.style.height = '0';
+                            itemElement.style.marginBottom = '0';
+                            itemElement.style.paddingTop = '0';
+                            itemElement.style.paddingBottom = '0';
+                            itemElement.style.border = 'none';
+
+                            setTimeout(() => {
+                                monthlyPlannedItems[currentMonth] = monthlyPlannedItems[currentMonth].filter(item => item.id !== itemIdToDelete);
+                                saveData();
+                                updatePlannedItemsList();
+                                updateDailyExpenseUI();
+                            }, 200); 
+                        }
+                    }
+                }
+            });
+
+            viewStatisticsButton.addEventListener('click', () => {
+                // 画面切り替え (即時)
+                switchScreen(savingsStatisticsScreen, dailyExpenseScreen);
+                updateSavingsChart();
+            });
+
+            backToDailyExpenseButton.addEventListener('click', () => {
+                // 画面切り替え (即時)
+                switchScreen(dailyExpenseScreen, savingsStatisticsScreen);
+                updateDailyExpenseUI();
+            });
+
+            menuIcon.addEventListener('click', () => {
+                if (!dailyExpenseScreen.classList.contains('hidden')) {
+                    // 画面切り替え (即時)
+                    switchScreen(budgetSettingScreen, dailyExpenseScreen);
+                    monthlyBudgetInput.value = currentMonthlyBudget > 0 ? currentMonthlyBudget : '';
+                    updateBudgetSetupUI();
+                }
+            });
+
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                // 現在のモードを示す絵文字
+                darkModeToggle.textContent = isDarkMode ? '🌙' : '☀️'; 
+            });
+
+            // --- Initial Load ---
+            function initializeApp() {
+                loadData();
+                
+                const savedDarkMode = localStorage.getItem('darkMode');
+                if (savedDarkMode === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    darkModeToggle.textContent = '🌙';
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    darkModeToggle.textContent = '☀️';
+                }
+
+                // 現在の予算が設定されていれば、直接dailyExpenseScreenを表示
+                if (currentMonthlyBudget > 0) {
+                    switchScreen(dailyExpenseScreen, budgetSettingScreen);
+                    updateDailyExpenseUI();
+                } else {
+                    // 予算が設定されていなければ、予算設定画面を表示
+                    switchScreen(budgetSettingScreen, dailyExpenseScreen);
+                    updateBudgetSetupUI(); 
+                }
+
+                settleMonthlyBudget(); 
+                updateDailyExpenseUI(); 
+                updateSavingsChart(); 
+                
+                // アプリケーション起動時に日付入力欄の初期状態をチェック
+                updateDateInputColor(); 
+            }
+
+            initializeApp(); 
+        });
+    </script>
+</body>
+</html>
